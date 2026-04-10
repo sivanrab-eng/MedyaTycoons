@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎬 Media Tycoons - אימפריית המדיה</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&family=Luckiest+Guy&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Stage */
+      --stage-bg: #1a0a2a;
+      --stage-red: #c41e3a;
+      --stage-gold: #ffd700;
+      /* Creative */
+      --creative-bg: #3e2723;
+      --creative-wood: #5d4037;
+      --creative-accent: #9c27b0;
+      --creative-gold: #ffecb3;
+      /* Tech */
+      --tech-bg: #0a0e1a;
+      --tech-accent: #00d4ff;
+      --tech-laser: #00ffcc;
+      /* Visual */
+      --visual-accent: #ff6b9d;
+      /* Sound */
+      --sound-accent: #ffb74d;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Heebo', sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 20%, #2d1155 0%, var(--stage-bg) 50%, #0a0412 100%);
+    }
+
+    .fun-font { font-family: 'Luckiest Guy', cursive; }
+
+    /* ============ LOBBY ============ */
+    .screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    .spotlight {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: spotlightFloat 8s ease-in-out infinite;
+    }
+    .spotlight-1 { top: -100px; left: 10%; width: 300px; height: 400px; background: radial-gradient(ellipse, rgba(255,215,0,0.07) 0%, transparent 70%); }
+    .spotlight-2 { top: -50px; right: 5%; width: 350px; height: 450px; background: radial-gradient(ellipse, rgba(196,30,58,0.06) 0%, transparent 70%); animation-delay: -3s; }
+    .spotlight-3 { bottom: 0; left: 40%; width: 250px; height: 300px; background: radial-gradient(ellipse, rgba(156,39,176,0.05) 0%, transparent 70%); animation-delay: -5s; }
+
+    @keyframes spotlightFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(20px) scale(1.05); }
+    }
+
+    .game-title {
+      font-size: 52px;
+      color: var(--stage-gold);
+      text-shadow: 0 0 40px rgba(255,215,0,0.4), 0 0 80px rgba(255,215,0,0.15), 0 4px 8px rgba(0,0,0,0.5);
+      letter-spacing: 3px;
+      animation: titleGlow 3s ease-in-out infinite;
+    }
+    @keyframes titleGlow {
+      0%, 100% { text-shadow: 0 0 40px rgba(255,215,0,0.4), 0 0 80px rgba(255,215,0,0.15); }
+      50% { text-shadow: 0 0 60px rgba(255,215,0,0.6), 0 0 120px rgba(255,215,0,0.25); }
+    }
+
+    .subtitle { font-size: 16px; color: #c4a0e0; margin-top: 8px; margin-bottom: 36px; }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border-radius: 24px;
+      padding: 32px;
+      border: 1px solid rgba(255,215,0,0.12);
+      backdrop-filter: blur(20px);
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--stage-gold), transparent);
+      opacity: 0.4;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 2px solid rgba(255,215,0,0.2);
+      background: rgba(0,0,0,0.35);
+      color: #fff;
+      font-size: 18px;
+      font-family: 'Heebo', sans-serif;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .input-field:focus { border-color: rgba(255,215,0,0.5); }
+    .input-field::placeholder { color: #666; }
+
+    .input-code {
+      text-align: center;
+      letter-spacing: 10px;
+      font-size: 28px;
+      color: var(--tech-accent);
+      border-color: rgba(0,212,255,0.3);
+      font-family: 'Luckiest Guy', cursive;
+    }
+
+    .btn {
+      padding: 15px 28px;
+      border-radius: 16px;
+      border: none;
+      font-size: 20px;
+      font-weight: 700;
+      font-family: 'Heebo', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { cursor: not-allowed; opacity: 0.5; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--stage-red), var(--creative-accent));
+      color: #fff;
+      box-shadow: 0 4px 25px rgba(196,30,58,0.35);
+    }
+    .btn-primary:hover:not(:disabled) { box-shadow: 0 6px 35px rgba(196,30,58,0.5); transform: translateY(-2px); }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid rgba(255,215,0,0.25);
+      color: var(--stage-gold);
+    }
+    .btn-secondary:hover:not(:disabled) { background: rgba(255,215,0,0.08); }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--stage-gold), #ff8c00);
+      color: var(--stage-bg);
+      font-family: 'Luckiest Guy', cursive;
+      font-size: 24px;
+      box-shadow: 0 4px 30px rgba(255,215,0,0.35);
+    }
+    .btn-gold:hover:not(:disabled) { box-shadow: 0 8px 40px rgba(255,215,0,0.5); transform: translateY(-2px); }
+
+    .btn-neon {
+      background: linear-gradient(135deg, var(--tech-accent), var(--tech-laser));
+      color: #000;
+      font-weight: 900;
+    }
+
+    .player-count-selector {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 12px 0 20px;
+    }
+    .player-count-btn {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: #777;
+      font-size: 24px;
+      font-family: 'Luckiest Guy', cursive;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .player-count-btn.active {
+      border: 3px solid var(--stage-gold);
+      background: rgba(255,215,0,0.15);
+      color: var(--stage-gold);
+      box-shadow: 0 0 20px rgba(255,215,0,0.2);
+    }
+
+    /* ============ WAITING ============ */
+    .room-code {
+      font-size: 60px;
+      letter-spacing: 14px;
+      color: var(--stage-gold);
+      text-shadow: 0 0 40px rgba(255,215,0,0.5);
+      animation: titleGlow 3s ease-in-out infinite;
+    }
+
+    .player-slot {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      animation: slideIn 0.4s ease;
+    }
+    .player-slot.filled { background: rgba(255,215,0,0.06); }
+    .player-slot.empty { border: 1px dashed rgba(255,255,255,0.08); color: #444; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ============ GAME ============ */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .role-badge {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .stage-area {
+      background: linear-gradient(180deg, rgba(26,10,42,0.8) 0%, rgba(13,5,24,0.9) 100%);
+      padding: 16px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Curtains */
+    .curtain-left, .curtain-right {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 30px;
+      background: linear-gradient(180deg, var(--stage-red), #8b0000);
+      opacity: 0.5;
+    }
+    .curtain-left { left: 0; border-radius: 0 0 20px 0; }
+    .curtain-right { right: 0; border-radius: 0 0 0 20px; }
+
+    .likes-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .likes-track {
+      width: 200px; height: 12px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .likes-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--stage-gold), #ff8c00);
+      border-radius: 10px;
+      transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    .feedback-area {
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .feedback-msg {
+      padding: 12px 24px;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .feedback-success {
+      background: linear-gradient(135deg, rgba(76,175,80,0.25), rgba(255,215,0,0.15));
+      border: 1px solid rgba(76,175,80,0.3);
+      animation: successPop 0.5s ease;
+    }
+    .feedback-error {
+      background: linear-gradient(135deg, rgba(244,67,54,0.25), rgba(255,152,0,0.15));
+      border: 1px solid rgba(244,67,54,0.3);
+      animation: errorShake 0.6s ease;
+    }
+
+    @keyframes successPop {
+      0% { transform: scale(0.7); opacity: 0; }
+      60% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(-12px) rotate(-1deg); }
+      30% { transform: translateX(12px) rotate(1deg); }
+      45% { transform: translateX(-8px); }
+      60% { transform: translateX(8px); }
+      75% { transform: translateX(-4px); }
+    }
+
+    /* Error animations */
+    .error-anim-container {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .falling-item {
+      position: absolute;
+      font-size: 40px;
+      animation: fall 1.5s ease-in forwards;
+    }
+    @keyframes fall {
+      0% { top: -50px; opacity: 1; }
+      80% { opacity: 1; }
+      100% { top: 100vh; opacity: 0; }
+    }
+
+    .shake-screen { animation: screenShake 0.4s ease; }
+    @keyframes screenShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    /* Content cards */
+    .role-card {
+      border-radius: 18px;
+      padding: 20px;
+      margin: 8px 0;
+    }
+
+    .script-card {
+      background: rgba(255,236,179,0.05);
+      border: 1px solid rgba(156,39,176,0.15);
+    }
+
+    .script-text {
+      font-size: 28px;
+      line-height: 1.5;
+      direction: ltr;
+      text-align: center;
+      color: #fff;
+    }
+    .script-hebrew { font-size: 15px; color: #c4a0e0; text-align: center; margin-top: 8px; }
+
+    .info-chip {
+      border-radius: 14px;
+      padding: 12px 18px;
+      text-align: center;
+      margin: 6px 0;
+    }
+    .info-visual { background: rgba(255,107,157,0.06); border: 1px solid rgba(255,107,157,0.12); }
+    .info-sound { background: rgba(255,183,77,0.06); border: 1px solid rgba(255,183,77,0.12); }
+
+    .control-panel {
+      border-radius: 18px;
+      padding: 20px;
+      background: rgba(0,212,255,0.04);
+      border: 1px solid rgba(0,212,255,0.1);
+    }
+
+    .option-btn {
+      width: 100%;
+      padding: 18px 20px;
+      border-radius: 14px;
+      border: 2px solid rgba(0,212,255,0.25);
+      background: rgba(0,212,255,0.06);
+      color: #fff;
+      font-size: 24px;
+      font-family: 'Luckiest Guy', cursive;
+      cursor: pointer;
+      transition: all 0.25s;
+      margin-bottom: 10px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--tech-accent);
+      background: rgba(0,212,255,0.12);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,212,255,0.15);
+    }
+    .option-btn:active:not(:disabled) { transform: scale(0.98); }
+    .option-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+    .option-btn.correct { border-color: #4caf50; background: rgba(76,175,80,0.2); }
+
+    .option-label {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: rgba(0,212,255,0.5);
+      font-family: 'Heebo', sans-serif;
+    }
+
+    .hint-toggle {
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,255,204,0.2);
+      background: rgba(0,255,204,0.06);
+      color: var(--tech-laser);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Heebo', sans-serif;
+      margin-top: 14px;
+      transition: all 0.3s;
+    }
+    .hint-toggle:hover { background: rgba(0,255,204,0.12); }
+
+    .hint-box {
+      margin-top: 14px;
+      padding: 18px;
+      border-radius: 14px;
+      background: rgba(0,255,204,0.05);
+      border: 1px solid rgba(0,255,204,0.15);
+      font-size: 15px;
+      line-height: 1.7;
+      color: #b0ffee;
+      animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============ HIGH FIVE ============ */
+    .highfive-emoji {
+      font-size: 100px;
+      animation: bounce 0.8s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-25px) scale(1.1); }
+    }
+
+    .btn-highfive {
+      padding: 22px 60px;
+      border-radius: 24px;
+      border: none;
+      font-size: 28px;
+      font-weight: 900;
+      font-family: 'Luckiest Guy', cursive;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-highfive.waiting { background: linear-gradient(135deg, #4caf50, #66bb6a); color: #fff; cursor: default; }
+    .btn-highfive.ready { background: linear-gradient(135deg, var(--stage-gold), #ff8c00); color: var(--stage-bg); box-shadow: 0 6px 35px rgba(255,215,0,0.4); }
+    .btn-highfive.ready:hover { transform: translateY(-3px) scale(1.05); }
+
+    /* ============ END ============ */
+    .trophy { font-size: 80px; animation: successPop 0.8s ease; }
+
+    .final-score {
+      background: rgba(255,215,0,0.08);
+      border-radius: 24px;
+      padding: 28px 48px;
+      border: 1px solid rgba(255,215,0,0.15);
+      text-align: center;
+    }
+
+    .player-chip {
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 10px 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Particles */
+    .particles-container {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none; z-index: 99;
+    }
+    .particle {
+      position: absolute;
+      font-size: 24px;
+      animation: particleFloat 2s ease forwards;
+    }
+    @keyframes particleFloat {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-100px) scale(0.3); }
+    }
+
+    /* Connection status */
+    .connection-status {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      z-index: 200;
+    }
+    .connected { background: rgba(76,175,80,0.2); color: #4caf50; }
+    .disconnected { background: rgba(244,67,54,0.2); color: #f44336; }
+    .local-mode { background: rgba(255,183,77,0.2); color: #ffb74d; }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .game-title { font-size: 36px; }
+      .room-code { font-size: 44px; letter-spacing: 10px; }
+      .script-text { font-size: 22px; }
+      .option-btn { font-size: 20px; padding: 14px 16px; }
+    }
+
+    .hidden { display: none !important; }
+
+    /* Toast messages */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      font-size: 14px;
+      z-index: 300;
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+  </style>
+</head>
+<body>
+
+<!-- ============ LOBBY SCREEN ============ -->
+<div id="screen-lobby" class="screen">
+  <div class="spotlight spotlight-1"></div>
+  <div class="spotlight spotlight-2"></div>
+  <div class="spotlight spotlight-3"></div>
+
+  <div class="game-title fun-font">🎬 Media Tycoons</div>
+  <div class="subtitle">ברוכים הבאים לאימפריית המדיה! בחרו כינוי והצטרפו להפקה.</div>
+
+  <div class="card">
+    <input id="nickname-input" class="input-field" placeholder="הכינוי שלך..." maxlength="20" autocomplete="off">
+
+    <div id="lobby-buttons" style="margin-top: 20px;">
+      <label style="font-size: 14px; color: #c4a0e0; display: block; margin-bottom: 6px;">מספר שחקנים:</label>
+      <div class="player-count-selector">
+        <button class="player-count-btn active" data-count="2" onclick="selectPlayerCount(2)">2</button>
+        <button class="player-count-btn" data-count="3" onclick="selectPlayerCount(3)">3</button>
+        <button class="player-count-btn" data-count="4" onclick="selectPlayerCount(4)">4</button>
+      </div>
+      <button class="btn btn-primary" onclick="createRoom()" style="margin-bottom: 12px;">🎤 צור חדר חדש</button>
+      <button class="btn btn-secondary" onclick="showJoinUI()">🎯 הצטרף לחדר קיים</button>
+    </div>
+
+    <div id="join-ui" class="hidden" style="margin-top: 20px;">
+      <input id="room-code-input" class="input-field input-code" placeholder="קוד" maxlength="4" autocomplete="off">
+      <button class="btn btn-neon" onclick="joinRoom()" style="margin-top: 12px;">עלה לשידור! 🚀</button>
+      <button class="btn btn-secondary" onclick="hideJoinUI()" style="margin-top: 8px; font-size: 14px;">← חזרה</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ WAITING SCREEN ============ -->
+<div id="screen-waiting" class="screen hidden">
+  <div class="spotlight spotlight-1"></div>
+  <div class="spotlight spotlight-2"></div>
+
+  <div style="font-size: 18px; color: #c4a0e0; margin-bottom: 10px;">קוד החדר:</div>
+  <div id="display-room-code" class="room-code fun-font"></div>
+  <div style="font-size: 13px; color: #666; margin: 12px 0 28px;">שתפו את הקוד עם חברי הצוות (או פתחו טאב נוסף)</div>
+
+  <div class="card" style="padding: 24px;">
+    <div id="waiting-status" style="font-weight: 700; margin-bottom: 16px;"></div>
+    <div id="players-list"></div>
+  </div>
+
+  <button id="start-btn" class="btn btn-gold hidden" onclick="startGame()" style="max-width: 400px; margin-top: 24px;">
+    🎬 יוצאים לשידור!
+  </button>
+  <div id="waiting-msg" style="margin-top: 20px; font-size: 16px; color: #c4a0e0;">
+    ⏳ ממתינים שמנהל החדר יתחיל...
+  </div>
+</div>
+
+<!-- ============ GAME SCREEN ============ -->
+<div id="screen-game" class="screen hidden" style="justify-content: flex-start; padding: 0;">
+  <!-- Header -->
+  <div class="game-header" style="width: 100%;">
+    <div>
+      <span id="role-badge" class="role-badge"></span>
+    </div>
+    <div id="puzzle-counter" style="font-size: 14px; color: #999;"></div>
+  </div>
+
+  <!-- Stage -->
+  <div class="stage-area" style="width: 100%;">
+    <div class="curtain-left"></div>
+    <div class="curtain-right"></div>
+    <div class="likes-bar">
+      <span style="color: var(--stage-gold); font-size: 14px;">👍</span>
+      <div class="likes-track"><div id="likes-fill" class="likes-fill" style="width: 0%;"></div></div>
+      <span id="likes-count" style="color: var(--stage-gold); font-size: 14px; font-weight: 700;">0</span>
+    </div>
+    <div class="feedback-area">
+      <div id="feedback-msg" class="hidden"></div>
+      <div id="topic-display" style="font-size: 14px; color: #555;"></div>
+    </div>
+  </div>
+
+  <!-- Role Content -->
+  <div id="game-content" style="flex: 1; padding: 16px 20px; width: 100%; overflow-y: auto;"></div>
+</div>
+
+<!-- ============ HIGH FIVE SCREEN ============ -->
+<div id="screen-highfive" class="screen hidden">
+  <div class="highfive-emoji">🙌</div>
+  <div style="font-size: 28px; font-weight: 900; color: var(--stage-gold); text-shadow: 0 0 20px rgba(255,215,0,0.4); margin: 12px 0;">
+    שיתוף פעולה אדיר!
+  </div>
+  <div id="highfive-subtitle" style="font-size: 16px; color: #c4a0e0; margin-bottom: 28px;"></div>
+  <button id="highfive-btn" class="btn-highfive ready" onclick="doHighFive()">✋ High Five!</button>
+  <div id="highfive-counter" style="margin-top: 18px; font-size: 14px; color: #888;"></div>
+</div>
+
+<!-- ============ END SCREEN ============ -->
+<div id="screen-end" class="screen hidden">
+  <div class="trophy">🏆</div>
+  <div class="fun-font" style="font-size: 36px; color: var(--stage-gold); text-shadow: 0 0 30px rgba(255,215,0,0.5); margin: 8px 0;">
+    ההופעה הייתה להיט!
+  </div>
+  <div style="font-size: 18px; color: #c4a0e0; margin-bottom: 24px;">אימפריית המדיה שלכם שוברת שיאים!</div>
+  <div class="final-score">
+    <div id="final-likes" class="fun-font" style="font-size: 52px; color: var(--stage-gold);"></div>
+    <div style="font-size: 14px; color: #999;">לייקים</div>
+  </div>
+  <div id="final-players" style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 24px 0;"></div>
+  <button class="btn btn-primary" onclick="location.reload()" style="max-width: 300px;">🎬 להפקה הבאה!</button>
+</div>
+
+<!-- ============ PARTICLES CONTAINER ============ -->
+<div id="particles" class="particles-container"></div>
+<div id="error-anim" class="error-anim-container hidden"></div>
+
+<!-- Connection Status -->
+<div id="connection-status" class="connection-status local-mode">📡 מצב מקומי</div>
+
+<!-- ============ AUDIO (Web Audio API) ============ -->
+<script>
+const AudioSystem = {
+  ctx: null,
+  init() {
+    if (this.ctx) return;
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  },
+  play(type) {
+    this.init();
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+
+    if (type === 'success') {
+      // Happy ascending chime
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.15, now + i * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.4);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.12);
+        osc.stop(now + i * 0.12 + 0.4);
+      });
+    }
+    else if (type === 'error') {
+      // Wha-wha-wha
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.linearRampToValueAtTime(150, now + 0.6);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.8);
+    }
+    else if (type === 'highfive') {
+      // Pop!
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.3);
+    }
+    else if (type === 'click') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 600;
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    }
+  }
+};
+</script>
+
+<!-- ============ GAME LOGIC ============ -->
+<script>
+// ---- PUZZLES ----
+const PUZZLES = [
+  { id:1, topic:"Present Simple", creative_text:"The DJ ____ (play) music.", creative_hebrew:"התקליטן (מנגן) מוזיקה.", time_word:"Every night", visual_description:"🎧 תקליטן אחד בעמדה", options:["play","plays","is playing"], answer:"plays", tech_hint:"ה-DJ הוא He (הוא). בהרגל קבוע, מוסיפים S לפועל.", error_text:"ה-DJ משתעל ויוצאת לו תרנגולת מהפה! 🐔", success_text:"ה-DJ מרים ידיים! המוזיקה מקפיצה! 🎶", error_anim:"chicken_cough" },
+  { id:2, topic:"Present Simple", creative_text:"We ____ (not / like) boring shows.", creative_hebrew:"אנחנו (לא אוהבים) מופעים משעממים.", time_word:"Always", visual_description:"👦👧👦 קבוצת ילדים מחייכת", options:["don't like","doesn't like","not like"], answer:"don't like", tech_hint:"עם We (אנחנו), השלילה היא תמיד Don't.", error_text:"הקהל מוציא כריות ונרדם! 😴💤", success_text:"הקהל קופץ מהכיסאות! 🎉", error_anim:"audience_snore" },
+  { id:3, topic:"Present Progressive", creative_text:"The stars ____ (shine).", creative_hebrew:"הכוכבים (מנצנצים) עכשיו.", time_word:"Right now!", visual_description:"⭐⭐⭐ כוכבים רבים בשמיים", options:["shines","is shining","are shining"], answer:"are shining", tech_hint:"פעולה שקורה עכשיו + רבים (Stars) = Are + ing.", error_text:"הכוכבים נופלים מהשמיים כמו כדורי גומי! ⭐💥", success_text:"הכוכבים מנצנצים בזהב! ✨", error_anim:"falling_stars" },
+  { id:4, topic:"Present Simple", creative_text:"He ____ (have) a new guitar.", creative_hebrew:"יש לו גיטרה חדשה.", time_word:"Today", visual_description:"🎸 ילד אחד מחזיק גיטרה", options:["have","has","haves"], answer:"has", tech_hint:"שימו לב! הפועל Have הופך ל-Has בגוף שלישי (He/She).", error_text:"הגיטרה הופכת למחבט טניס! 🎾😂", success_text:"הגיטרה מנגנת סולו מטורף! 🎸🔥", error_anim:"guitar_tennis" },
+  { id:5, topic:"Present Progressive", creative_text:"I ____ (dance) on stage.", creative_hebrew:"אני (רוקד) על הבמה עכשיו.", time_word:"At the moment", visual_description:"💃 דמות מצביעה על עצמה", options:["is dancing","am dancing","dance"], answer:"am dancing", tech_hint:"עם I (אני) תמיד משתמשים ב-Am.", error_text:"הרקדן מתחיל לרקוד ב-Lag ומתפרק! 🤖⚡", success_text:"ריקוד מושלם! הקהל משתגע! 💃🕺", error_anim:"robot_glitch" },
+  { id:6, topic:"Present Simple", creative_text:"____ she (sing) well?", creative_hebrew:"האם היא (שרה) טוב?", time_word:"Usually", visual_description:"🎤 בחורה אחת עם מיקרופון", options:["Do","Does","Is"], answer:"Does", tech_hint:"בשאלה על She (היא), מתחילים עם Does.", error_text:"המיקרופון הופך לבננה! 🍌😂", success_text:"הזמרת שרה נפלא! 🎵👏", error_anim:"mic_banana" },
+  { id:7, topic:"Past Simple", creative_text:"The band ____ (go) home.", creative_hebrew:"הלהקה (הלכה) הביתה אתמול.", time_word:"Yesterday", visual_description:"🎵 להקה הולכת הצידה", options:["go","goes","went"], answer:"went", tech_hint:"זה פועל מורד! בעבר, Go הופך ל-Went.", error_text:"השעון מסתובב אחורה בטירוף! ⏰🌀", success_text:"הלהקה נעלמת בסטייל! 🎸✌️", error_anim:"time_rewind" },
+  { id:8, topic:"Past Simple", creative_text:"They ____ (watch) the movie.", creative_hebrew:"הם (צפו) בסרט בשבוע שעבר.", time_word:"Last week", visual_description:"🍿 קבוצה עם פופקורן", options:["watch","watched","watching"], answer:"watched", tech_hint:"פועל רגיל בעבר? פשוט מוסיפים ED בסוף.", error_text:"הפופקורן מתפוצץ לכל הכיוונים! 🍿💥", success_text:"סרט מצוין! הקהל מוחא כפיים! 🎬👏", error_anim:"popcorn_explosion" },
+  { id:9, topic:"Past Simple", creative_text:"I ____ (not / see) you.", creative_hebrew:"לא (ראיתי) אותך אתמול.", time_word:"Yesterday", visual_description:"👀 דמות מבולבלת", options:["didn't see","didn't saw","not saw"], answer:"didn't see", tech_hint:"אחרי ה-Didn't הפועל חוזר להיות רגיל (V1)!", error_text:"הדמות הופכת לשקופה! רק הבגדים נשארים! 👻", success_text:"הדמות מופיעה בזוהר! 🌟", error_anim:"invisible_hero" },
+  { id:10, topic:"Present Simple", creative_text:"My fans ____ (love) me.", creative_hebrew:"המעריצים שלי (אוהבים) אותי.", time_word:"Always", visual_description:"❤️ קהל עם לבבות", options:["love","loves","is love"], answer:"love", tech_hint:"מעריצים זה רבים (They), לכן הפועל נשאר רגיל.", error_text:"המעריצים בוכים! מזרקות דמעות! 😭💦", success_text:"המעריצים שולחים לבבות! ❤️❤️❤️", error_anim:"fan_crying_funny" }
+];
+
+const ROLES_BY_COUNT = { 2: ["creative","tech"], 3: ["creative","tech","visual"], 4: ["creative","tech","visual","sound"] };
+const ROLE_INFO = {
+  creative: { name:"Creative Lead", heb:"מנהל/ת תוכן", emoji:"🎬", color:"#9c27b0" },
+  tech: { name:"Tech Director", heb:"מנהל/ת מערכת", emoji:"💻", color:"#00d4ff" },
+  visual: { name:"Visual Stylist", heb:"מנהל/ת ויזואליה", emoji:"🎨", color:"#ff6b9d" },
+  sound: { name:"Sound & Timing", heb:"מנהל/ת סאונד", emoji:"🎵", color:"#ffb74d" }
+};
+
+const ERROR_EMOJIS = {
+  chicken_cough: ["🐔","🐓","🥚"],
+  audience_snore: ["😴","💤","🛏️"],
+  falling_stars: ["⭐","💫","✨"],
+  guitar_tennis: ["🎾","🏸","🎸"],
+  robot_glitch: ["🤖","⚡","🔧"],
+  mic_banana: ["🍌","🍌","🎤"],
+  time_rewind: ["⏰","🌀","⏪"],
+  popcorn_explosion: ["🍿","🍿","🍿","🍿","🍿"],
+  invisible_hero: ["👻","👕","👖"],
+  fan_crying_funny: ["😭","💧","😢"]
+};
+
+// ---- STATE ----
+let state = {
+  nickname: '',
+  roomCode: '',
+  playerCount: 2,
+  isHost: false,
+  myId: Math.random().toString(36).slice(2, 8),
+  players: [],
+  role: null,
+  currentPuzzle: 0,
+  likes: 0,
+  showHint: false,
+  feedbackActive: false,
+  highFiveReady: {},
+  useSocket: false,
+  socket: null,
+  channel: null
+};
+
+// ---- SCREENS ----
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(`screen-${id}`).classList.remove('hidden');
+}
+
+// ---- PLAYER COUNT ----
+function selectPlayerCount(n) {
+  state.playerCount = n;
+  document.querySelectorAll('.player-count-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.count) === n);
+  });
+  AudioSystem.play('click');
+}
+
+// ---- JOIN UI ----
+function showJoinUI() {
+  document.getElementById('lobby-buttons').classList.add('hidden');
+  document.getElementById('join-ui').classList.remove('hidden');
+  AudioSystem.play('click');
+}
+function hideJoinUI() {
+  document.getElementById('join-ui').classList.add('hidden');
+  document.getElementById('lobby-buttons').classList.remove('hidden');
+}
+
+// ---- COMMUNICATION LAYER ----
+// Try Socket.io first, fallback to BroadcastChannel
+function initComms(code) {
+  // Try BroadcastChannel (local multi-tab)
+  try {
+    state.channel = new BroadcastChannel(`media-tycoons-${code}`);
+    state.channel.onmessage = handleChannelMessage;
+    updateConnectionStatus('local');
+  } catch(e) {}
+
+  // Try Socket.io if available
+  if (typeof io !== 'undefined') {
+    try {
+      state.socket = io(getServerUrl());
+      state.socket.on('connect', () => updateConnectionStatus('connected'));
+      state.socket.on('disconnect', () => updateConnectionStatus('disconnected'));
+      setupSocketHandlers();
+      state.useSocket = true;
+    } catch(e) {
+      state.useSocket = false;
+    }
+  }
+}
+
+function getServerUrl() {
+  // Default to localhost in dev, can be changed to Railway URL
+  return window.MEDIA_TYCOONS_SERVER || 'http://localhost:3001';
+}
+
+function updateConnectionStatus(s) {
+  const el = document.getElementById('connection-status');
+  if (s === 'connected') { el.className = 'connection-status connected'; el.textContent = '🟢 מחובר לשרת'; }
+  else if (s === 'disconnected') { el.className = 'connection-status disconnected'; el.textContent = '🔴 מנותק'; }
+  else { el.className = 'connection-status local-mode'; el.textContent = '📡 מצב מקומי (טאבים)'; }
+}
+
+function broadcast(type, data = {}) {
+  const msg = { type, senderId: state.myId, ...data };
+  if (state.channel) state.channel.postMessage(msg);
+  // Socket handled separately
+}
+
+function setupSocketHandlers() {
+  if (!state.socket) return;
+  const s = state.socket;
+
+  s.on('ROOM_UPDATE', (data) => {
+    state.players = data.players;
+    renderWaitingRoom();
+  });
+
+  s.on('GAME_STARTED', (data) => {
+    state.players = data.players;
+    const me = data.players.find(p => p.id === s.id);
+    if (me) state.role = me.role;
+    state.currentPuzzle = 0;
+    state.likes = 0;
+    showScreen('game');
+    renderGame();
+  });
+
+  s.on('ANSWER_RESULT', (data) => {
+    showFeedback(data.correct, data.correct ? data.text : data.text, data.anim);
+    if (data.correct) state.likes = data.likes;
+  });
+
+  s.on('NEXT_PUZZLE', (data) => {
+    state.currentPuzzle = data.puzzleIndex;
+    state.likes = data.likes;
+    state.showHint = false;
+    state.feedbackActive = false;
+    showScreen('game');
+    renderGame();
+  });
+
+  s.on('HIGH_FIVE_TIME', (data) => {
+    state.highFiveReady = {};
+    showScreen('highfive');
+    renderHighFive(data.puzzlesDone);
+  });
+
+  s.on('HIGH_FIVE_UPDATE', (data) => {
+    document.getElementById('highfive-counter').textContent = `${data.count} / ${data.total} מוכנים`;
+  });
+
+  s.on('GAME_ENDED', (data) => {
+    state.likes = data.likes;
+    state.players = data.players;
+    showScreen('end');
+    renderEnd();
+  });
+
+  s.on('PLAYER_LEFT', (data) => {
+    state.players = data.players;
+    showToast('שחקן עזב את החדר');
+  });
+}
+
+// ---- BROADCAST CHANNEL HANDLER (Local mode) ----
+function handleChannelMessage(e) {
+  const msg = e.data;
+  if (msg.senderId === state.myId) return;
+
+  switch(msg.type) {
+    case 'PLAYER_JOINED':
+      if (!state.players.find(p => p.id === msg.player.id)) {
+        state.players.push(msg.player);
+        renderWaitingRoom();
+        // Echo back existing players
+        state.players.forEach(p => {
+          broadcast('PLAYER_JOINED', { player: p });
+        });
+      }
+      break;
+
+    case 'GAME_START':
+      state.players = msg.players;
+      const me = msg.players.find(p => p.id === state.myId);
+      if (me) state.role = me.role;
+      state.currentPuzzle = 0;
+      state.likes = 0;
+      showScreen('game');
+      renderGame();
+      break;
+
+    case 'ANSWER_RESULT':
+      showFeedback(msg.correct, msg.text, msg.anim);
+      if (msg.correct) state.likes = msg.likes;
+      break;
+
+    case 'NEXT_PUZZLE':
+      state.currentPuzzle = msg.puzzleIndex;
+      state.likes = msg.likes;
+      state.showHint = false;
+      state.feedbackActive = false;
+      showScreen('game');
+      renderGame();
+      break;
+
+    case 'HIGH_FIVE_TIME':
+      state.highFiveReady = {};
+      showScreen('highfive');
+      renderHighFive(msg.puzzlesDone);
+      break;
+
+    case 'HIGH_FIVE_DONE':
+      state.highFiveReady[msg.senderId] = true;
+      const hfCount = Object.keys(state.highFiveReady).length;
+      document.getElementById('highfive-counter').textContent = `${hfCount} / ${state.players.length} מוכנים`;
+      if (hfCount >= state.players.length) {
+        setTimeout(() => {
+          state.currentPuzzle = msg.nextPuzzle;
+          state.showHint = false;
+          state.feedbackActive = false;
+          showScreen('game');
+          renderGame();
+        }, 600);
+      }
+      break;
+
+    case 'GAME_ENDED':
+      state.likes = msg.likes;
+      showScreen('end');
+      renderEnd();
+      break;
+  }
+}
+
+// ---- ROOM ACTIONS ----
+function createRoom() {
+  const nick = document.getElementById('nickname-input').value.trim();
+  if (!nick) return showToast('נא להזין כינוי');
+  state.nickname = nick;
+  state.isHost = true;
+
+  if (state.useSocket && state.socket?.connected) {
+    state.socket.emit('CREATE_ROOM', { nickname: nick, playerCount: state.playerCount }, (res) => {
+      if (res.success) {
+        state.roomCode = res.code;
+        state.players = [res.player];
+        state.myId = res.player.id;
+        showScreen('waiting');
+        renderWaitingRoom();
+      }
+    });
+  } else {
+    // Local mode
+    state.roomCode = generateCode();
+    const me = { id: state.myId, nickname: nick, role: null };
+    state.players = [me];
+    initComms(state.roomCode);
+    showScreen('waiting');
+    renderWaitingRoom();
+    setTimeout(() => broadcast('PLAYER_JOINED', { player: me }), 100);
+  }
+  AudioSystem.play('click');
+}
+
+function joinRoom() {
+  const nick = document.getElementById('nickname-input').value.trim();
+  const code = document.getElementById('room-code-input').value.trim().toUpperCase();
+  if (!nick) return showToast('נא להזין כינוי');
+  if (!code || code.length < 4) return showToast('נא להזין קוד חדר');
+  state.nickname = nick;
+  state.roomCode = code;
+  state.isHost = false;
+
+  if (state.useSocket && state.socket?.connected) {
+    state.socket.emit('JOIN_ROOM', { code, nickname: nick }, (res) => {
+      if (res.success) {
+        state.myId = res.player.id;
+        state.players = res.players;
+        state.playerCount = res.playerCount;
+        showScreen('waiting');
+        renderWaitingRoom();
+      } else {
+        showToast(res.error);
+      }
+    });
+  } else {
+    // Local mode
+    const me = { id: state.myId, nickname: nick, role: null };
+    state.players = [me];
+    initComms(code);
+    showScreen('waiting');
+    renderWaitingRoom();
+    setTimeout(() => broadcast('PLAYER_JOINED', { player: me }), 100);
+  }
+  AudioSystem.play('click');
+}
+
+function startGame() {
+  if (state.players.length < 2) return showToast('צריך לפחות 2 שחקנים');
+
+  if (state.useSocket && state.socket?.connected) {
+    state.socket.emit('START_GAME', { code: state.roomCode });
+  } else {
+    // Local: assign roles and broadcast
+    const roles = ROLES_BY_COUNT[state.playerCount] || ROLES_BY_COUNT[2];
+    state.players.forEach((p, i) => { p.role = roles[i] || roles[roles.length - 1]; });
+    const me = state.players.find(p => p.id === state.myId);
+    if (me) state.role = me.role;
+    state.currentPuzzle = 0;
+    state.likes = 0;
+    showScreen('game');
+    renderGame();
+    broadcast('GAME_START', { players: state.players });
+  }
+  AudioSystem.play('success');
+}
+
+function generateCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+// ---- RENDER WAITING ----
+function renderWaitingRoom() {
+  document.getElementById('display-room-code').textContent = state.roomCode;
+  document.getElementById('waiting-status').textContent = `ממתינים לשאר חברי הצוות... (${state.players.length}/${state.playerCount})`;
+
+  const roles = ROLES_BY_COUNT[state.playerCount] || ROLES_BY_COUNT[2];
+  let html = '';
+  for (let i = 0; i < state.playerCount; i++) {
+    const p = state.players[i];
+    const ri = ROLE_INFO[roles[i]];
+    if (p) {
+      html += `<div class="player-slot filled"><span style="font-size:24px">${ri?.emoji||'⭐'}</span><span style="font-weight:700;color:var(--stage-gold)">${p.nickname}</span><span style="font-size:12px;color:#888;margin-right:auto">${ri?.heb||''}</span></div>`;
+    } else {
+      html += `<div class="player-slot empty">⏳ ממתין לשחקן...</div>`;
+    }
+  }
+  document.getElementById('players-list').innerHTML = html;
+
+  if (state.isHost && state.players.length >= 2) {
+    document.getElementById('start-btn').classList.remove('hidden');
+    document.getElementById('waiting-msg').classList.add('hidden');
+  } else if (!state.isHost) {
+    document.getElementById('start-btn').classList.add('hidden');
+    document.getElementById('waiting-msg').classList.remove('hidden');
+  }
+}
+
+// ---- RENDER GAME ----
+function renderGame() {
+  const puzzle = PUZZLES[state.currentPuzzle];
+  const role = state.role || 'creative';
+  const ri = ROLE_INFO[role];
+  const pc = state.playerCount;
+
+  // Header
+  document.getElementById('role-badge').innerHTML = `${ri.emoji} ${state.nickname} | ${ri.heb}`;
+  document.getElementById('role-badge').style.background = `${ri.color}33`;
+  document.getElementById('role-badge').style.color = ri.color;
+  document.getElementById('puzzle-counter').textContent = `חידה ${state.currentPuzzle + 1}/10`;
+
+  // Likes
+  document.getElementById('likes-fill').style.width = `${Math.min(100, state.likes / 10)}%`;
+  document.getElementById('likes-count').textContent = state.likes;
+  document.getElementById('topic-display').textContent = `${puzzle.topic} | 🎬 אולפן ההקלטות`;
+  document.getElementById('feedback-msg').classList.add('hidden');
+
+  // Content
+  let content = '';
+
+  // Script (creative sees full, tech sees in 2-player mode)
+  if (role === 'creative' || (pc === 2 && role === 'tech')) {
+    content += `
+      <div class="role-card script-card">
+        <div style="font-size:12px;color:var(--creative-accent);font-weight:700;margin-bottom:12px">📜 התסריט</div>
+        <div class="script-text fun-font">${puzzle.creative_text}</div>
+        <div class="script-hebrew">${puzzle.creative_hebrew}</div>
+      </div>`;
+  }
+
+  // Visual info
+  if (role === 'visual' || (pc <= 3 && role === 'creative') || (pc === 2)) {
+    content += `
+      <div class="info-chip info-visual">
+        <span style="font-size:12px;color:var(--visual-accent);font-weight:700">🎨 ויזואליה: </span>
+        <span style="font-size:16px">${puzzle.visual_description}</span>
+      </div>`;
+  }
+
+  // Sound/timing info
+  if (role === 'sound' || (pc <= 3 && role === 'creative') || (pc === 2)) {
+    content += `
+      <div class="info-chip info-sound">
+        <span style="font-size:12px;color:var(--sound-accent);font-weight:700">⏰ זמן: </span>
+        <span class="fun-font" style="font-size:22px;color:var(--sound-accent)">${puzzle.time_word}</span>
+      </div>`;
+  }
+
+  // Tech controls (tech always, creative in 2-player)
+  if (role === 'tech' || (pc === 2 && role === 'creative')) {
+    if (role === 'tech') {
+      content += `
+        <div class="control-panel">
+          <div style="font-size:12px;color:var(--tech-accent);font-weight:700;margin-bottom:6px">📜 התסריט</div>
+          <div class="fun-font" style="font-size:22px;direction:ltr;text-align:center;margin-bottom:14px">${puzzle.creative_text}</div>`;
+    } else {
+      content += `<div class="control-panel">`;
+    }
+
+    content += `<div style="font-size:12px;color:var(--tech-accent);font-weight:700;margin-bottom:12px">🎛️ לוח בקרה — בחרו את הקוד הנכון:</div>`;
+    puzzle.options.forEach((opt, i) => {
+      content += `<button class="option-btn" onclick="submitAnswer('${opt}')" id="opt-${i}">
+        <span class="option-label" style="direction:ltr">${String.fromCharCode(65+i)}</span>${opt}
+      </button>`;
+    });
+
+    content += `<button class="hint-toggle" onclick="toggleHint()">📟 פתח מכשיר קשר (טיפ סודי)</button>`;
+    content += `<div id="hint-box" class="hint-box hidden"><div style="font-weight:900;margin-bottom:6px;color:var(--tech-laser)">📟 הודעה מהבמאי:</div>${puzzle.tech_hint}</div>`;
+    content += `</div>`;
+  }
+
+  document.getElementById('game-content').innerHTML = content;
+
+  // Set background based on role
+  const gameScreen = document.getElementById('screen-game');
+  if (role === 'tech') gameScreen.style.background = 'radial-gradient(ellipse at 30% 20%, #0d1a30 0%, #0a0e1a 60%, #000 100%)';
+  else if (role === 'visual') gameScreen.style.background = 'radial-gradient(ellipse at 60% 30%, #2a0035 0%, #1a0020 60%, #0a000f 100%)';
+  else if (role === 'sound') gameScreen.style.background = 'radial-gradient(ellipse at 40% 40%, #2a2000 0%, #1a1200 60%, #0a0800 100%)';
+  else gameScreen.style.background = 'radial-gradient(ellipse at 50% 30%, #4a2c20 0%, #3e2723 50%, #1a0f0a 100%)';
+}
+
+function toggleHint() {
+  state.showHint = !state.showHint;
+  const box = document.getElementById('hint-box');
+  const toggle = document.querySelector('.hint-toggle');
+  if (state.showHint) {
+    box.classList.remove('hidden');
+    toggle.textContent = '📟 סגור מכשיר קשר';
+  } else {
+    box.classList.add('hidden');
+    toggle.textContent = '📟 פתח מכשיר קשר (טיפ סודי)';
+  }
+  AudioSystem.play('click');
+}
+
+// ---- SUBMIT ANSWER ----
+function submitAnswer(answer) {
+  if (state.feedbackActive) return;
+  AudioSystem.play('click');
+
+  if (state.useSocket && state.socket?.connected) {
+    state.socket.emit('SUBMIT_ANSWER', { code: state.roomCode, answer });
+  } else {
+    // Local logic
+    const puzzle = PUZZLES[state.currentPuzzle];
+    const correct = answer === puzzle.answer;
+
+    if (correct) {
+      state.likes += 100;
+      showFeedback(true, puzzle.success_text);
+      broadcast('ANSWER_RESULT', { correct: true, text: puzzle.success_text, likes: state.likes });
+
+      // Mark correct
+      puzzle.options.forEach((opt, i) => {
+        if (opt === puzzle.answer) document.getElementById(`opt-${i}`)?.classList.add('correct');
+      });
+
+      setTimeout(() => {
+        const next = state.currentPuzzle + 1;
+        if (next >= PUZZLES.length) {
+          showScreen('end');
+          renderEnd();
+          broadcast('GAME_ENDED', { likes: state.likes });
+        } else if (next % 3 === 0) {
+          state.highFiveReady = {};
+          showScreen('highfive');
+          renderHighFive(next);
+          broadcast('HIGH_FIVE_TIME', { puzzlesDone: next });
+        } else {
+          state.currentPuzzle = next;
+          state.showHint = false;
+          state.feedbackActive = false;
+          renderGame();
+          broadcast('NEXT_PUZZLE', { puzzleIndex: next, likes: state.likes });
+        }
+      }, 2500);
+    } else {
+      showFeedback(false, puzzle.error_text, puzzle.error_anim);
+      broadcast('ANSWER_RESULT', { correct: false, text: puzzle.error_text, anim: puzzle.error_anim });
+    }
+  }
+}
+
+// ---- FEEDBACK ----
+function showFeedback(correct, text, animType) {
+  state.feedbackActive = true;
+  const el = document.getElementById('feedback-msg');
+  el.className = correct ? 'feedback-msg feedback-success' : 'feedback-msg feedback-error';
+  el.textContent = text;
+  el.classList.remove('hidden');
+  document.getElementById('topic-display').classList.add('hidden');
+
+  // Disable buttons
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+
+  if (correct) {
+    AudioSystem.play('success');
+    spawnParticles(['🌟','✨','🎉','⭐','💫'], 12);
+    // Update likes display
+    document.getElementById('likes-fill').style.width = `${Math.min(100, state.likes / 10)}%`;
+    document.getElementById('likes-count').textContent = state.likes;
+  } else {
+    AudioSystem.play('error');
+    if (animType) playErrorAnim(animType);
+    // Shake
+    document.getElementById('screen-game').classList.add('shake-screen');
+    setTimeout(() => document.getElementById('screen-game').classList.remove('shake-screen'), 500);
+    // Re-enable after delay
+    setTimeout(() => {
+      state.feedbackActive = false;
+      el.classList.add('hidden');
+      document.getElementById('topic-display').classList.remove('hidden');
+      document.querySelectorAll('.option-btn').forEach(b => b.disabled = false);
+    }, 2500);
+  }
+}
+
+function playErrorAnim(type) {
+  const emojis = ERROR_EMOJIS[type] || ['💥'];
+  const container = document.getElementById('error-anim');
+  container.classList.remove('hidden');
+  container.innerHTML = '';
+
+  for (let i = 0; i < 8; i++) {
+    const el = document.createElement('div');
+    el.className = 'falling-item';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left = `${10 + Math.random() * 80}%`;
+    el.style.animationDelay = `${Math.random() * 0.5}s`;
+    el.style.fontSize = `${30 + Math.random() * 30}px`;
+    container.appendChild(el);
+  }
+
+  setTimeout(() => { container.classList.add('hidden'); container.innerHTML = ''; }, 2000);
+}
+
+function spawnParticles(emojis, count) {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left = `${10 + Math.random() * 80}%`;
+    p.style.bottom = `${Math.random() * 30}%`;
+    p.style.animationDelay = `${Math.random() * 0.5}s`;
+    container.appendChild(p);
+    setTimeout(() => p.remove(), 2500);
+  }
+}
+
+// ---- HIGH FIVE ----
+function renderHighFive(puzzlesDone) {
+  document.getElementById('highfive-subtitle').textContent = `סיימתם ${puzzlesDone} חידות! תנו כיף וירטואלי כדי להמשיך!`;
+  document.getElementById('highfive-counter').textContent = `0 / ${state.players.length} מוכנים`;
+  const btn = document.getElementById('highfive-btn');
+  btn.className = 'btn-highfive ready';
+  btn.textContent = '✋ High Five!';
+  btn.disabled = false;
+}
+
+function doHighFive() {
+  AudioSystem.play('highfive');
+  state.highFiveReady[state.myId] = true;
+
+  const btn = document.getElementById('highfive-btn');
+  btn.className = 'btn-highfive waiting';
+  btn.textContent = '✅ מחכים לצוות...';
+  btn.disabled = true;
+
+  spawnParticles(['🙌','✋','👏','⭐'], 8);
+
+  const count = Object.keys(state.highFiveReady).length;
+  document.getElementById('highfive-counter').textContent = `${count} / ${state.players.length} מוכנים`;
+
+  if (state.useSocket && state.socket?.connected) {
+    state.socket.emit('HIGH_FIVE', { code: state.roomCode });
+  } else {
+    broadcast('HIGH_FIVE_DONE', { nextPuzzle: state.currentPuzzle + 1 });
+    if (count >= state.players.length) {
+      setTimeout(() => {
+        state.currentPuzzle++;
+        state.showHint = false;
+        state.feedbackActive = false;
+        showScreen('game');
+        renderGame();
+      }, 800);
+    }
+  }
+}
+
+// ---- END ----
+function renderEnd() {
+  document.getElementById('final-likes').textContent = `👍 ${state.likes}`;
+  let html = '';
+  state.players.forEach(p => {
+    const ri = ROLE_INFO[p.role] || {};
+    html += `<div class="player-chip" style="border:1px solid ${ri.color || '#555'}44">${ri.emoji || '⭐'} ${p.nickname}</div>`;
+  });
+  document.getElementById('final-players').innerHTML = html;
+  spawnParticles(['🏆','🎬','⭐','🎉','💫'], 15);
+  AudioSystem.play('success');
+}
+
+// ---- TOAST ----
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ---- INIT ----
+document.getElementById('nickname-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') createRoom();
+});
+document.getElementById('room-code-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') joinRoom();
+});
+document.getElementById('room-code-input').addEventListener('input', e => {
+  e.target.value = e.target.value.toUpperCase();
+});
+
+// Try loading Socket.io
+const sioScript = document.createElement('script');
+sioScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js';
+sioScript.onload = () => {
+  console.log('Socket.io loaded');
+  // Will connect when creating/joining room
+};
+sioScript.onerror = () => console.log('Socket.io not available, using local mode');
+document.head.appendChild(sioScript);
+</script>
+
+</body>
+</html>
