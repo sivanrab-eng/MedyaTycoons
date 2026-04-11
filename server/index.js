@@ -215,7 +215,11 @@ io.on("connection", (socket) => {
 
 // Health check
 app.get("/", (req, res) => {
-  res.json({ status: "Media Tycoons Server Running", rooms: Object.keys(rooms).length });
+  res.json({ status: "Media Tycoons Server Running", rooms: Object.keys(rooms).length, uptime: process.uptime() });
+});
+
+app.get("/ping", (req, res) => {
+  res.json({ ok: true, rooms: Object.keys(rooms).length });
 });
 
 const PORT = process.env.PORT || 3001;

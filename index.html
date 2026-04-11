@@ -1002,17 +1002,22 @@ function createRoom() {
   state.isHost = true;
 
   if (state.useSocket && state.socket?.connected) {
+    showToast('יוצר חדר...');
     state.socket.emit('CREATE_ROOM', { nickname: nick, playerCount: state.playerCount }, (res) => {
+      if (!res) return showToast('⚠️ השרת לא הגיב. נסו שוב.');
       if (res.success) {
         state.roomCode = res.code;
         state.players = [res.player];
         state.myId = res.player.id;
         showScreen('waiting');
         renderWaitingRoom();
+      } else {
+        showToast(res.error || 'שגיאה ביצירת חדר');
       }
     });
   } else {
-    // Local mode
+    // Local mode - warn user
+    showToast('⚠️ לא מחובר לשרת - מצב מקומי בלבד (טאבים באותו מכשיר)');
     state.roomCode = generateCode();
     const me = { id: state.myId, nickname: nick, role: null };
     state.players = [me];
@@ -1034,7 +1039,13 @@ function joinRoom() {
   state.isHost = false;
 
   if (state.useSocket && state.socket?.connected) {
+    showToast('מתחבר לחדר...');
+    const timeout = setTimeout(() => {
+      showToast('⚠️ השרת לא הגיב. בדקו חיבור ונסו שוב.');
+    }, 5000);
     state.socket.emit('JOIN_ROOM', { code, nickname: nick }, (res) => {
+      clearTimeout(timeout);
+      if (!res) return showToast('⚠️ השרת לא הגיב. נסו שוב.');
       if (res.success) {
         state.myId = res.player.id;
         state.players = res.players;
@@ -1046,7 +1057,12 @@ function joinRoom() {
       }
     });
   } else {
-    // Local mode
+    // Not connected - show clear error instead of silently going to local mode
+    if (code) {
+      showToast('⚠️ לא מחובר לשרת! בדקו חיבור לאינטרנט ורפרשו.');
+      return;
+    }
+    // Local mode fallback only if no code (shouldn't happen)
     const me = { id: state.myId, nickname: nick, role: null };
     state.players = [me];
     initComms(code);
@@ -1431,22 +1447,53 @@ document.getElementById('room-code-input').addEventListener('input', e => {
 const sioScript = document.createElement('script');
 sioScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js';
 sioScript.onload = () => {
-  console.log('Socket.io loaded, connecting to server...');
+  console.log('Socket.io loaded, connecting to', getServerUrl());
   try {
-    state.socket = io(getServerUrl(), { transports: ['websocket', 'polling'] });
+    state.socket = io(getServerUrl(), {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 10000
+    });
     state.socket.on('connect', () => {
-      console.log('Connected to server!');
+      console.log('Connected to server! Socket ID:', state.socket.id);
       state.useSocket = true;
       updateConnectionStatus('connected');
+      // If we were in a room, re-join after reconnect
+      if (state.roomCode && state.nickname) {
+        console.log('Reconnected - re-joining room', state.roomCode);
+        state.socket.emit('JOIN_ROOM', { code: state.roomCode, nickname: state.nickname }, (res) => {
+          if (res && res.success) {
+            state.myId = res.player.id;
+            console.log('Re-joined room successfully');
+          } else {
+            console.log('Re-join failed:', res?.error);
+            if (res?.error === 'חדר לא נמצא') {
+              showToast('⚠️ החדר נסגר. השרת כנראה עשה restart. צרו חדר חדש.');
+              showScreen('lobby');
+            }
+          }
+        });
+      }
     });
-    state.socket.on('disconnect', () => {
+    state.socket.on('disconnect', (reason) => {
+      console.log('Disconnected from server. Reason:', reason);
       state.useSocket = false;
       updateConnectionStatus('disconnected');
+      if (state.roomCode) {
+        showToast('⚠️ החיבור לשרת נותק. מנסה להתחבר מחדש...');
+      }
     });
     state.socket.on('connect_error', (err) => {
-      console.log('Server connection failed, using local mode', err.message);
+      console.log('Server connection failed:', err.message);
       state.useSocket = false;
       updateConnectionStatus('local');
+    });
+    state.socket.on('reconnect_attempt', (n) => {
+      console.log('Reconnection attempt', n);
+      updateConnectionStatus('disconnected');
     });
     setupSocketHandlers();
   } catch(e) {
