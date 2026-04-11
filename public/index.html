@@ -920,7 +920,17 @@ function setupSocketHandlers() {
 
   s.on('PLAYER_LEFT', (data) => {
     state.players = data.players;
-    showToast('שחקן עזב את החדר');
+    showToast('😢 ' + (data.nickname || 'שחקן') + ' עזב את החדר');
+  });
+
+  s.on('PLAYER_AWAY', (data) => {
+    state.players = data.players;
+    showToast('📱 ' + (data.nickname || 'שחקן') + ' נותק לרגע...');
+  });
+
+  s.on('PLAYER_RECONNECTED', (data) => {
+    state.players = data.players;
+    showToast('🟢 ' + (data.nickname || 'שחקן') + ' חזר!');
   });
 }
 
@@ -1467,7 +1477,28 @@ sioScript.onload = () => {
         state.socket.emit('JOIN_ROOM', { code: state.roomCode, nickname: state.nickname }, (res) => {
           if (res && res.success) {
             state.myId = res.player.id;
-            console.log('Re-joined room successfully');
+            state.players = res.players;
+            console.log('Re-joined room successfully, reconnected:', res.reconnected);
+            // Restore full game state if reconnecting mid-game
+            if (res.reconnected && res.gameState) {
+              state.likes = res.likes || 0;
+              state.currentPuzzle = res.puzzleIndex || 0;
+              if (res.gameState === 'playing' && res.puzzle) {
+                showScreen('game');
+                renderGame();
+                showToast('🟢 חזרת למשחק!');
+              } else if (res.gameState === 'highfive') {
+                showScreen('highfive');
+                renderHighFive(res.puzzleIndex);
+                showToast('🟢 חזרת למשחק!');
+              } else if (res.gameState === 'waiting') {
+                showScreen('waiting');
+                renderWaitingRoom();
+              } else if (res.gameState === 'ended') {
+                showScreen('end');
+                renderEnd();
+              }
+            }
           } else {
             console.log('Re-join failed:', res?.error);
             if (res?.error === 'חדר לא נמצא') {

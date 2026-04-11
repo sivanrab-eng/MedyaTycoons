@@ -33,6 +33,8 @@ const ROLES_BY_COUNT = {
 
 // ============ ROOM MANAGEMENT ============
 const rooms = {};
+const disconnectTimers = {}; // keyed by "roomCode:nickname"
+const DISCONNECT_GRACE_MS = 20000; // 20 seconds grace period
 
 function createRoom(code, playerCount) {
   rooms[code] = {
@@ -79,9 +81,43 @@ io.on("connection", (socket) => {
   socket.on("JOIN_ROOM", ({ code, nickname }, callback) => {
     const room = getRoom(code);
     if (!room) return callback({ success: false, error: "חדר לא נמצא" });
+
+    // Check if this is a reconnecting player (same nickname)
+    const existing = room.players.find(p => p.nickname === nickname);
+    if (existing) {
+      // Cancel any pending disconnect timer
+      const timerKey = `${code}:${nickname}`;
+      if (disconnectTimers[timerKey]) {
+        clearTimeout(disconnectTimers[timerKey]);
+        delete disconnectTimers[timerKey];
+        console.log(`Reconnect timer cancelled for ${nickname} in ${code}`);
+      }
+      // Update socket id and clear disconnected flag
+      const oldId = existing.id;
+      existing.id = socket.id;
+      existing.disconnected = false;
+      socket.join(code);
+      currentRoom = code;
+
+      io.to(code).emit("PLAYER_RECONNECTED", { players: room.players, playerId: socket.id, nickname });
+
+      // Send full state so reconnecting player can resume
+      const statePayload = {
+        success: true, reconnected: true, player: existing,
+        players: room.players, playerCount: room.playerCount,
+        gameState: room.state, puzzleIndex: room.currentPuzzle, likes: room.likes
+      };
+      if (room.state === "playing" && room.puzzles[room.currentPuzzle]) {
+        statePayload.puzzle = room.puzzles[room.currentPuzzle];
+      }
+      callback(statePayload);
+      console.log(`${nickname} reconnected to room ${code}`);
+      return;
+    }
+
+    // New player joining
     if (room.state !== "waiting") return callback({ success: false, error: "המשחק כבר התחיל" });
     if (room.players.length >= room.playerCount) return callback({ success: false, error: "החדר מלא" });
-    if (room.players.find(p => p.nickname === nickname)) return callback({ success: false, error: "הכינוי הזה כבר תפוס" });
 
     const player = { id: socket.id, nickname, role: null };
     room.players.push(player);
@@ -178,7 +214,8 @@ io.on("connection", (socket) => {
       total: room.players.length
     });
 
-    if (room.highFives.size >= room.players.length) {
+    const activePlayers = room.players.filter(p => !p.disconnected);
+    if (room.highFives.size >= activePlayers.length) {
       room.state = "playing";
       room.currentPuzzle++;
       room.attempts = 0;
@@ -198,14 +235,37 @@ io.on("connection", (socket) => {
     if (currentRoom) {
       const room = getRoom(currentRoom);
       if (room) {
-        room.players = room.players.filter(p => p.id !== socket.id);
-        io.to(currentRoom).emit("PLAYER_LEFT", {
-          players: room.players,
-          playerId: socket.id
-        });
-        if (room.players.length === 0) {
-          delete rooms[currentRoom];
-          console.log(`Room ${currentRoom} deleted (empty)`);
+        const player = room.players.find(p => p.id === socket.id);
+        if (player) {
+          // Mark as disconnected but don't remove yet
+          player.disconnected = true;
+          const timerKey = `${currentRoom}:${player.nickname}`;
+          const roomRef = currentRoom;
+
+          io.to(currentRoom).emit("PLAYER_AWAY", {
+            players: room.players,
+            playerId: socket.id,
+            nickname: player.nickname
+          });
+          console.log(`Player ${player.nickname} went away from room ${currentRoom} (grace period started)`);
+
+          // Grace period - remove player after timeout if they don't reconnect
+          disconnectTimers[timerKey] = setTimeout(() => {
+            delete disconnectTimers[timerKey];
+            const r = getRoom(roomRef);
+            if (r) {
+              r.players = r.players.filter(p => p.nickname !== player.nickname);
+              io.to(roomRef).emit("PLAYER_LEFT", {
+                players: r.players,
+                nickname: player.nickname
+              });
+              if (r.players.length === 0) {
+                delete rooms[roomRef];
+                console.log(`Room ${roomRef} deleted (empty)`);
+              }
+              console.log(`Player ${player.nickname} removed from ${roomRef} after grace period`);
+            }
+          }, DISCONNECT_GRACE_MS);
         }
       }
     }
