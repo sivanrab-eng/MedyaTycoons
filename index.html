@@ -839,25 +839,15 @@ function hideJoinUI() {
 // ---- COMMUNICATION LAYER ----
 // Try Socket.io first, fallback to BroadcastChannel
 function initComms(code) {
-  // Try BroadcastChannel (local multi-tab)
+  // Try BroadcastChannel (local multi-tab fallback)
   try {
     state.channel = new BroadcastChannel(`media-tycoons-${code}`);
     state.channel.onmessage = handleChannelMessage;
-    updateConnectionStatus('local');
+    if (!state.useSocket) updateConnectionStatus('local');
   } catch(e) {}
 
-  // Try Socket.io if available
-  if (typeof io !== 'undefined') {
-    try {
-      state.socket = io(getServerUrl());
-      state.socket.on('connect', () => updateConnectionStatus('connected'));
-      state.socket.on('disconnect', () => updateConnectionStatus('disconnected'));
-      setupSocketHandlers();
-      state.useSocket = true;
-    } catch(e) {
-      state.useSocket = false;
-    }
-  }
+  // Socket.io is already connected from page load (see bottom of file).
+  // No need to create a new connection here.
 }
 
 function getServerUrl() {
