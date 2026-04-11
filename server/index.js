@@ -2,6 +2,10 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+
+const ROOMS_FILE = path.join(__dirname, "..", "rooms.json");
 
 const app = express();
 app.use(cors());
@@ -31,23 +35,68 @@ const ROLES_BY_COUNT = {
   4: ["creative", "tech", "visual", "sound"]
 };
 
+// ============ ROOM PERSISTENCE ============
+function saveRooms() {
+  try {
+    const data = {};
+    for (const [code, room] of Object.entries(rooms)) {
+      data[code] = {
+        code: room.code,
+        playerCount: room.playerCount,
+        players: room.players,
+        state: room.state,
+        currentPuzzle: room.currentPuzzle,
+        likes: room.likes,
+        attempts: room.attempts,
+        highFives: Array.from(room.highFives || []),
+        createdAt: room.createdAt || Date.now()
+      };
+    }
+    fs.writeFileSync(ROOMS_FILE, JSON.stringify(data));
+  } catch (e) {
+    console.error("Failed to save rooms:", e.message);
+  }
+}
+
+function loadRooms() {
+  try {
+    if (!fs.existsSync(ROOMS_FILE)) return;
+    const data = JSON.parse(fs.readFileSync(ROOMS_FILE, "utf8"));
+    const now = Date.now();
+    const MAX_AGE = 2 * 60 * 60 * 1000; // 2 hours
+    for (const [code, room] of Object.entries(data)) {
+      if (now - (room.createdAt || 0) > MAX_AGE) continue; // skip expired
+      rooms[code] = {
+        ...room,
+        highFives: new Set(room.highFives || []),
+        puzzles: PUZZLES
+      };
+    }
+    console.log(`Loaded ${Object.keys(rooms).length} rooms from disk`);
+  } catch (e) {
+    console.error("Failed to load rooms:", e.message);
+  }
+}
+
 // ============ ROOM MANAGEMENT ============
 const rooms = {};
-const disconnectTimers = {}; // keyed by "roomCode:nickname"
-const DISCONNECT_GRACE_MS = 20000; // 20 seconds grace period
+const disconnectTimers = {};
+const DISCONNECT_GRACE_MS = 20000;
 
 function createRoom(code, playerCount) {
   rooms[code] = {
     code,
     playerCount,
     players: [],
-    state: "waiting", // waiting | playing | highfive | ended
+    state: "waiting",
     currentPuzzle: 0,
     likes: 0,
     attempts: 0,
     highFives: new Set(),
-    puzzles: PUZZLES
+    puzzles: PUZZLES,
+    createdAt: Date.now()
   };
+  saveRooms();
   return rooms[code];
 }
 
@@ -75,6 +124,7 @@ io.on("connection", (socket) => {
     socket.join(code);
     currentRoom = code;
     callback({ success: true, code, player });
+    saveRooms();
     console.log(`Room ${code} created by ${nickname}`);
   });
 
@@ -111,6 +161,7 @@ io.on("connection", (socket) => {
         statePayload.puzzle = room.puzzles[room.currentPuzzle];
       }
       callback(statePayload);
+      saveRooms();
       console.log(`${nickname} reconnected to room ${code}`);
       return;
     }
@@ -130,6 +181,7 @@ io.on("connection", (socket) => {
     });
 
     callback({ success: true, player, players: room.players, playerCount: room.playerCount });
+    saveRooms();
     console.log(`${nickname} joined room ${code}`);
   });
 
@@ -152,6 +204,7 @@ io.on("connection", (socket) => {
       puzzleIndex: 0
     });
     console.log(`Game started in room ${code}`);
+    saveRooms();
   });
 
   socket.on("SUBMIT_ANSWER", ({ code, answer }) => {
@@ -180,10 +233,12 @@ io.on("connection", (socket) => {
         if (nextIndex >= room.puzzles.length) {
           room.state = "ended";
           io.to(code).emit("GAME_ENDED", { likes: room.likes, players: room.players });
+          saveRooms();
         } else if (nextIndex % 3 === 0) {
           room.state = "highfive";
           room.highFives = new Set();
           io.to(code).emit("HIGH_FIVE_TIME", { puzzlesDone: nextIndex, likes: room.likes });
+          saveRooms();
         } else {
           room.currentPuzzle = nextIndex;
           room.attempts = 0;
@@ -192,6 +247,7 @@ io.on("connection", (socket) => {
             puzzleIndex: nextIndex,
             likes: room.likes
           });
+          saveRooms();
         }
       }, 2500);
     } else {
@@ -228,6 +284,7 @@ io.on("connection", (socket) => {
           likes: room.likes
         });
       }, 800);
+      saveRooms();
     }
   });
 
@@ -263,6 +320,7 @@ io.on("connection", (socket) => {
                 delete rooms[roomRef];
                 console.log(`Room ${roomRef} deleted (empty)`);
               }
+              saveRooms();
               console.log(`Player ${player.nickname} removed from ${roomRef} after grace period`);
             }
           }, DISCONNECT_GRACE_MS);
@@ -283,6 +341,7 @@ app.get("/ping", (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
+loadRooms();
 server.listen(PORT, () => {
   console.log(`🎬 Media Tycoons server running on port ${PORT}`);
 });
